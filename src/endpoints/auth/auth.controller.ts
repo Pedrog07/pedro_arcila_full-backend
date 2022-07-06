@@ -4,6 +4,6 @@ import { Controller, Get } from '@nestjs/common';
 export class AuthController {
   @Get()
   async hellow() {
-    return 'Hello world';
+    return { message: 'Hello world' };
   }
 }

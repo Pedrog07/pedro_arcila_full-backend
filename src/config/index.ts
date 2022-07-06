@@ -1,1 +1,1 @@
-export { default as getTypeOrmConfig } from './database';
+export { default as TypeOrmConfig } from './database';

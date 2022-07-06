@@ -1,4 +1,5 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { join } from 'path';
 
 export default (): TypeOrmModuleOptions => {
   const {
@@ -17,7 +18,8 @@ export default (): TypeOrmModuleOptions => {
     password: POSTGRES_PASSWORD,
     database: POSTGRES_DATABASE,
     autoLoadEntities: true,
-    entities: ['../entities/*.entity{.ts,.js}'],
+    synchronize: true,
+    entities: [join(__dirname, '../entities/*.entity{.ts,.js}')],
     ssl: false,
     extra: {
       ssl: {
