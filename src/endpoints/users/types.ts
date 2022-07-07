@@ -9,3 +9,12 @@ export interface VerifyEmailDTO {
   verificationCode: string;
   email: string;
 }
+
+export interface ResetPasswordRequestDTO {
+  email: string;
+}
+
+export interface ResetPasswordDTO {
+  token: string;
+  password: string;
+}

@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import File from './file.entity';
+import PasswordResetRequest from './password-reset-request.entity';
 import { generateUniqueKey } from 'utils';
 
 @Entity({ name: 'users' })
@@ -37,6 +38,12 @@ export default class User {
 
   @OneToMany(() => File, (file) => file.user)
   file: File;
+
+  @OneToMany(
+    () => PasswordResetRequest,
+    (passwordResetRequest) => passwordResetRequest.user,
+  )
+  passwordResetRequest: PasswordResetRequest;
 
   @Column({
     type: 'timestamp',

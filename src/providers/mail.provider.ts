@@ -43,4 +43,22 @@ export class MailProvider {
       Logger.log(error.message);
     }
   }
+
+  async sendPasswordResetEmail(email: string, data: any) {
+    try {
+      await axios.post(
+        `${this.mailHost}/send`,
+        {
+          template: this.templates.resetPassword,
+          recipient: {
+            address: email,
+          },
+          template_data: data,
+        },
+        { auth: this.auth },
+      );
+    } catch (error) {
+      Logger.log(error.message);
+    }
+  }
 }

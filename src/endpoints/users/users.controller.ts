@@ -13,4 +13,14 @@ export class UsersController {
   verifyEmail(@Body() body: any) {
     return this.usersProvider.verifyEmail(body);
   }
+
+  @Post('forgot-password')
+  resetPasswordRequest(@Body() body: any) {
+    return this.usersProvider.resetPasswordRequest(body);
+  }
+
+  @Post('reset-password')
+  resetPassword(@Body() body: any) {
+    return this.usersProvider.resetPassword(body);
+  }
 }
