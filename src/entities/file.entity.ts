@@ -14,7 +14,7 @@ export default class File {
   id: string;
 
   @Column({ type: 'varchar', name: 'file_name', length: 255, default: null })
-  filename: string;
+  fileName: string;
 
   @Column({ type: 'varchar', name: 'file_type', length: 255, default: null })
   fileType: string;
@@ -43,8 +43,8 @@ export default class File {
   @DeleteDateColumn({
     name: 'deleted_at',
     type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP',
+    default: null,
+    nullable: true,
   })
   deletedAt: Date;
 }
