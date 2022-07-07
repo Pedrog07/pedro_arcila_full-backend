@@ -22,6 +22,9 @@ export default class File {
   @Column({ type: 'varchar', name: 'file_url', length: 255, default: null })
   fileUrl: string;
 
+  @Column({ type: 'boolean', name: 'downloadable', default: false })
+  downloadable: boolean;
+
   @ManyToOne(() => User, (user) => user.file)
   user: User;
 

@@ -8,3 +8,8 @@ export interface SearchExternalFilesDTO {
   page: number;
   perPage: number;
 }
+
+export interface SaveExternalFilesDTO {
+  photoId: string;
+  fileName: string;
+}
