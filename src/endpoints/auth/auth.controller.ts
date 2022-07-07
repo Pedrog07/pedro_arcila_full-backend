@@ -1,9 +1,11 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
+import { AuthProvider } from './auth.provider';
 
 @Controller('auth')
 export class AuthController {
-  @Get()
-  async hellow() {
-    return { message: 'Hello world' };
+  constructor(private readonly authProvider: AuthProvider) {}
+  @Post()
+  async login(@Body() body: any) {
+    return this.authProvider.login(body);
   }
 }

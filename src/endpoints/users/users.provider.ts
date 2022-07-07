@@ -151,7 +151,9 @@ export class UsersProvider {
       );
     }
 
-    const { sub: id } = this.jwtService.verify(request.token);
+    const { sub: id } = this.jwtService.verify(request.token, {
+      secret: process.env.JWT_SECRET,
+    });
 
     const user = await this.userRepository.findOne({ where: { id } });
 
