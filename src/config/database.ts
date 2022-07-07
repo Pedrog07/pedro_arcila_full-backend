@@ -8,6 +8,7 @@ export default (): TypeOrmModuleOptions => {
     POSTGRES_USER,
     POSTGRES_PASSWORD,
     POSTGRES_DATABASE,
+    SYNC_DATABASE,
   } = process.env;
 
   return {
@@ -18,8 +19,9 @@ export default (): TypeOrmModuleOptions => {
     password: POSTGRES_PASSWORD,
     database: POSTGRES_DATABASE,
     autoLoadEntities: true,
-    //synchronize: true,
-    //dropSchema: true,
+    // These fields are to setup the database at the
+    synchronize: !!SYNC_DATABASE,
+    dropSchema: !!SYNC_DATABASE,
     entities: [join(__dirname, '../entities/*.entity{.ts,.js}')],
     ssl: false,
     extra: {
