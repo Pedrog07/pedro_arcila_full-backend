@@ -1,5 +1,6 @@
 import {
   Controller,
+  Get,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -14,7 +15,12 @@ export class FilesController {
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
-  upload(@UploadedFile() file, @AuthToken() authToken) {
+  upload(@UploadedFile() file, @AuthToken() authToken: string) {
     return this.filesProvider.upload(file, authToken);
+  }
+
+  @Get()
+  getUserFiles(@AuthToken() authToken: string) {
+    return this.filesProvider.getUserFiles(authToken);
   }
 }
