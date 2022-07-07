@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -6,7 +7,7 @@ async function bootstrap() {
     bodyParser: true,
   });
   await app.listen(3000, () => {
-    console.log(`Listening to port ${3000}`);
+    Logger.log(`Listening to port ${3000}`);
   });
 }
 bootstrap();
