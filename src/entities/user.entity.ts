@@ -10,16 +10,17 @@ import {
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import File from './file.entity';
+import { generateUniqueKey } from 'utils';
 
 @Entity({ name: 'users' })
 export default class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', name: 'first_name', length: 255, default: null })
+  @Column({ type: 'varchar', name: 'first_name', length: 255 })
   firstName: string;
 
-  @Column({ type: 'varchar', name: 'last_name', length: 255, default: null })
+  @Column({ type: 'varchar', name: 'last_name', length: 255 })
   lastName: string;
 
   @Column({ type: 'varchar', length: 255, unique: true })
@@ -30,6 +31,9 @@ export default class User {
 
   @Column({ type: 'boolean', name: 'verified_email', default: false })
   verifiedEmail: boolean;
+
+  @Column({ type: 'varchar', name: 'verification_code', length: 255 })
+  verificationCode: string;
 
   @OneToMany(() => File, (file) => file.user)
   file: File;
@@ -52,8 +56,8 @@ export default class User {
   @DeleteDateColumn({
     name: 'deleted_at',
     type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP',
+    default: null,
+    nullable: true,
   })
   deletedAt: Date;
 
@@ -62,5 +66,10 @@ export default class User {
   async hashPassword() {
     const salt = await bcrypt.genSalt();
     this.password = await bcrypt.hash(this.password, salt);
+  }
+
+  @BeforeInsert()
+  async generateVerificationCode() {
+    this.verificationCode = generateUniqueKey();
   }
 }
