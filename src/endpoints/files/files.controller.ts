@@ -50,4 +50,9 @@ export class FilesController {
   renameFile(@Body() body, @AuthToken() authToken) {
     return this.filesProvider.renameFile(body, authToken);
   }
+
+  @Post('search-external')
+  searchExternalFiles(@Body() body, @AuthToken() authToken: string) {
+    return this.filesProvider.searchExternalFiles(body, authToken);
+  }
 }

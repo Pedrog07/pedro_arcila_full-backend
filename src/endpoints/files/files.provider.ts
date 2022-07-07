@@ -5,9 +5,10 @@ import {
   AwsProvider,
   ExceptionsProvider,
   AuthorizationProvider,
+  UnsplashProvider,
 } from 'providers';
 import { User, File } from 'entities';
-import { RenameFileDTO } from './types';
+import { RenameFileDTO, SearchExternalFilesDTO } from './types';
 
 @Injectable()
 export class FilesProvider {
@@ -17,6 +18,7 @@ export class FilesProvider {
     private readonly awsProvider: AwsProvider,
     private readonly exceptionsProvider: ExceptionsProvider,
     private readonly authorizationProvider: AuthorizationProvider,
+    private readonly unsplashProvider: UnsplashProvider,
   ) {}
 
   async upload(file: any, authToken: string) {
@@ -184,5 +186,16 @@ export class FilesProvider {
       })
       .promise();
     return { buffer: Body, mimeType: file.fileType, fileName: file.fileName };
+  }
+
+  async searchExternalFiles(data: SearchExternalFilesDTO, authToken: string) {
+    const { page = 1, perPage = 10, search = '' } = data;
+
+    const result = await this.unsplashProvider.searchPhotos(
+      search,
+      page,
+      perPage,
+    );
+    return result;
   }
 }
