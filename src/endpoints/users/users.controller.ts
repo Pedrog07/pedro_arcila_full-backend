@@ -1,11 +1,16 @@
-import { Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
+import { UsersProvider } from './users.provider';
 
 @Controller('users')
 export class UsersController {
+  constructor(private readonly usersProvider: UsersProvider) {}
   @Post()
-  register() {
-    return {
-      message: 'register successful',
-    };
+  register(@Body() body: any) {
+    return this.usersProvider.register(body);
+  }
+
+  @Post('verify')
+  verifyEmail(@Body() body: any) {
+    return this.usersProvider.verifyEmail(body);
   }
 }

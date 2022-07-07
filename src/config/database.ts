@@ -18,7 +18,8 @@ export default (): TypeOrmModuleOptions => {
     password: POSTGRES_PASSWORD,
     database: POSTGRES_DATABASE,
     autoLoadEntities: true,
-    synchronize: true,
+    //synchronize: true,
+    //dropSchema: true,
     entities: [join(__dirname, '../entities/*.entity{.ts,.js}')],
     ssl: false,
     extra: {

@@ -1,9 +1,9 @@
 import { Module, Global } from '@nestjs/common';
-import { AuthorizationProvider } from 'providers';
+import { AuthorizationProvider, ExceptionsProvider } from 'providers';
 
 @Global()
 @Module({
-  providers: [AuthorizationProvider],
-  exports: [AuthorizationProvider],
+  providers: [AuthorizationProvider, ExceptionsProvider],
+  exports: [AuthorizationProvider, ExceptionsProvider],
 })
 export class GlobalModule {}
