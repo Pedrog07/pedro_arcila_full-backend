@@ -54,6 +54,33 @@ export class UsersProvider {
     return { message: 'Registration completed, please check your email' };
   }
 
+  async resendVerifyEmail(data: Omit<VerifyEmailDTO, 'verificationCode'>) {
+    const { email } = data;
+
+    if (!email) {
+      this.exceptionsProvider.throwCustomException(
+        this.exceptionsProvider.httpStatus.BAD_REQUEST,
+        'Missing email',
+      );
+    }
+
+    const user = await this.userRepository.findOne({ where: { email } });
+
+    if (!user) {
+      this.exceptionsProvider.throwCustomException(
+        this.exceptionsProvider.httpStatus.NOT_FOUND,
+        'User not found',
+      );
+    }
+
+    await this.mailProvider.sendRegistrationEmail(email, {
+      firstName: user.firstName,
+      verificationCode: user.verificationCode,
+    });
+
+    return { message: 'Verification email sent' };
+  }
+
   async verifyEmail(data: VerifyEmailDTO) {
     const { verificationCode, email } = data;
 
