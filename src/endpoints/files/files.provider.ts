@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -8,6 +7,7 @@ import {
   AuthorizationProvider,
 } from 'providers';
 import { User, File } from 'entities';
+import { RenameFileDTO } from './types';
 
 @Injectable()
 export class FilesProvider {
@@ -78,9 +78,111 @@ export class FilesProvider {
     return {
       files:
         files?.map((file: File) => {
-          const { fileName, fileUrl } = file;
-          return { fileName, fileUrl };
+          const { fileName, fileUrl, id } = file;
+          return { fileName, fileUrl, id };
         }) || [],
     };
+  }
+
+  async renameFile(data: RenameFileDTO, authToken: string) {
+    const id = this.authorizationProvider.validateToken(authToken);
+    const { fileId, newName } = data;
+
+    if (!fileId || !newName) {
+      this.exceptionsProvider.throwCustomException(
+        this.exceptionsProvider.httpStatus.BAD_REQUEST,
+        'Missing some fields',
+      );
+    }
+
+    const user = await this.userRepository.findOne({ where: { id } });
+
+    if (!user) {
+      this.exceptionsProvider.throwCustomException(
+        this.exceptionsProvider.httpStatus.NOT_FOUND,
+        'User not found',
+      );
+    }
+
+    const file = await this.fileRepository
+      .createQueryBuilder('file')
+      .where('file.userId = :id', { id })
+      .andWhere('file.id = :fileId', { fileId })
+      .getOne();
+
+    if (!file) {
+      this.exceptionsProvider.throwCustomException(
+        this.exceptionsProvider.httpStatus.NOT_FOUND,
+        'File not found',
+      );
+    }
+
+    const [currentKey, extension] = this.awsProvider.getCurrentFileKey(
+      id,
+      file.fileName,
+      true,
+    );
+    const [Key, fileName] = this.awsProvider.getFileKey(
+      id,
+      `${newName}${extension}`,
+    );
+
+    await this.awsProvider.s3
+      .copyObject({
+        Bucket: this.awsProvider.bucket,
+        CopySource: currentKey,
+        Key,
+      })
+      .promise();
+
+    file.fileName = fileName;
+    file.fileUrl = this.awsProvider.buildNewS3Url(file.fileUrl, Key);
+
+    await this.fileRepository.save(file);
+
+    return { message: 'File name successfully changed' };
+  }
+
+  async getFile(fileId: string, authToken: string) {
+    const id = this.authorizationProvider.validateToken(authToken);
+
+    if (!fileId) {
+      this.exceptionsProvider.throwCustomException(
+        this.exceptionsProvider.httpStatus.BAD_REQUEST,
+        'Missing file id',
+      );
+    }
+
+    const user = await this.userRepository.findOne({ where: { id } });
+
+    if (!user) {
+      this.exceptionsProvider.throwCustomException(
+        this.exceptionsProvider.httpStatus.NOT_FOUND,
+        'User not found',
+      );
+    }
+
+    const file = await this.fileRepository
+      .createQueryBuilder('file')
+      .where('file.userId = :id', { id })
+      .andWhere('file.id = :fileId', { fileId })
+      .getOne();
+
+    if (!file) {
+      this.exceptionsProvider.throwCustomException(
+        this.exceptionsProvider.httpStatus.NOT_FOUND,
+        'File not found',
+      );
+    }
+
+    const [Key] = this.awsProvider.getCurrentFileKey(id, file.fileName);
+
+    const { Body } = await this.awsProvider.s3
+      .getObject({
+        Bucket: this.awsProvider.bucket,
+        Key,
+      })
+      .promise();
+    return { buffer: Body, mimeType: file.fileType, fileName: file.fileName };
   }
 }
