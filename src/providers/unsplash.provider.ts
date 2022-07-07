@@ -21,4 +21,20 @@ export class UnsplashProvider {
     this.collections = collections;
     this.topics = topics;
   }
+
+  async searchPhotos(search: string, page: number, perPage: number) {
+    const {
+      response: { total, total_pages, results },
+    } = await this.search.getPhotos({ query: search, page, perPage });
+    return {
+      total,
+      totalPages: total_pages,
+      results: results.map((res) => ({
+        id: res.id,
+        description: res.description,
+        altDescription: res.alt_description,
+        url: res.urls.small,
+      })),
+    };
+  }
 }
