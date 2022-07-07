@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { createApi } from 'unsplash-js';
 import nodeFetch from 'node-fetch';
+import axios from 'axios';
 
 @Injectable()
 export class UnsplashProvider {
@@ -36,5 +37,11 @@ export class UnsplashProvider {
         url: res.urls.small,
       })),
     };
+  }
+
+  async getPhoto(photoId: string) {
+    const { response } = await this.photos.get({ photoId });
+
+    return { url: response?.urls.small };
   }
 }

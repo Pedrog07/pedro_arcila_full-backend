@@ -52,7 +52,12 @@ export class FilesController {
   }
 
   @Post('search-external')
-  searchExternalFiles(@Body() body, @AuthToken() authToken: string) {
-    return this.filesProvider.searchExternalFiles(body, authToken);
+  searchExternalFiles(@Body() body) {
+    return this.filesProvider.searchExternalFiles(body);
+  }
+
+  @Post('save-external')
+  saveExternalFiles(@Body() body, @AuthToken() authToken: string) {
+    return this.filesProvider.saveExternalFiles(body, authToken);
   }
 }

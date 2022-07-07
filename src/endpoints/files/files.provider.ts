@@ -8,7 +8,11 @@ import {
   UnsplashProvider,
 } from 'providers';
 import { User, File } from 'entities';
-import { RenameFileDTO, SearchExternalFilesDTO } from './types';
+import {
+  RenameFileDTO,
+  SearchExternalFilesDTO,
+  SaveExternalFilesDTO,
+} from './types';
 
 @Injectable()
 export class FilesProvider {
@@ -54,6 +58,7 @@ export class FilesProvider {
     newFile.user = user;
     newFile.fileName = fileName;
     newFile.fileUrl = Location;
+    newFile.downloadable = true;
 
     await this.fileRepository.save(newFile);
 
@@ -119,6 +124,13 @@ export class FilesProvider {
       );
     }
 
+    if (!file.downloadable) {
+      this.exceptionsProvider.throwCustomException(
+        this.exceptionsProvider.httpStatus.BAD_REQUEST,
+        'This type of file can not be renamed',
+      );
+    }
+
     const [currentKey, extension] = this.awsProvider.getCurrentFileKey(
       id,
       file.fileName,
@@ -177,6 +189,13 @@ export class FilesProvider {
       );
     }
 
+    if (!file.downloadable) {
+      this.exceptionsProvider.throwCustomException(
+        this.exceptionsProvider.httpStatus.BAD_REQUEST,
+        'This type of file can not be downloaded',
+      );
+    }
+
     const [Key] = this.awsProvider.getCurrentFileKey(id, file.fileName);
 
     const { Body } = await this.awsProvider.s3
@@ -188,7 +207,7 @@ export class FilesProvider {
     return { buffer: Body, mimeType: file.fileType, fileName: file.fileName };
   }
 
-  async searchExternalFiles(data: SearchExternalFilesDTO, authToken: string) {
+  async searchExternalFiles(data: SearchExternalFilesDTO) {
     const { page = 1, perPage = 10, search = '' } = data;
 
     const result = await this.unsplashProvider.searchPhotos(
@@ -197,5 +216,46 @@ export class FilesProvider {
       perPage,
     );
     return result;
+  }
+
+  async saveExternalFiles(data: SaveExternalFilesDTO, authToken: string) {
+    const id = this.authorizationProvider.validateToken(authToken);
+    const { photoId, fileName } = data;
+
+    if (!photoId) {
+      this.exceptionsProvider.throwCustomException(
+        this.exceptionsProvider.httpStatus.BAD_REQUEST,
+        'Missing file id',
+      );
+    }
+
+    const user = await this.userRepository.findOne({ where: { id } });
+
+    if (!user) {
+      this.exceptionsProvider.throwCustomException(
+        this.exceptionsProvider.httpStatus.NOT_FOUND,
+        'User not found',
+      );
+    }
+
+    const { url } = await this.unsplashProvider.getPhoto(photoId);
+
+    if (!url) {
+      this.exceptionsProvider.throwCustomException(
+        this.exceptionsProvider.httpStatus.NOT_FOUND,
+        'Requested file not found',
+      );
+    }
+
+    const newFile = new File();
+
+    newFile.fileType = 'image/jpeg';
+    newFile.user = user;
+    newFile.fileName = `${fileName}.jpg`;
+    newFile.fileUrl = url;
+
+    await this.fileRepository.save(newFile);
+
+    return { message: 'File saved successfully' };
   }
 }
